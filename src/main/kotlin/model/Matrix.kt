@@ -34,10 +34,10 @@ data class Matrix(
         return Matrix(product)
     }
 
-    fun minor(row: Int, col: Int): Matrix =
+    private fun minor(row: Int, col: Int): Matrix =
         Matrix(matrix.filterIndexed { i, _ -> i != row }.map { it.filterIndexed { j, _ -> j != col } })
 
-    fun determinant(): Float {
+    private fun determinant(): Float {
         if (matrix.size == 1) return matrix[0][0]
         if (matrix.size == 2) {
             return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
@@ -51,7 +51,7 @@ data class Matrix(
         return det
     }
 
-    fun cofactorMatrix(): Matrix {
+    private fun cofactorMatrix(): Matrix {
         val size = matrix.size
         val cofactorMatrix = MutableList(size) { MutableList(size) { 0.0f } }
 
