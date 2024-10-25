@@ -35,7 +35,7 @@ fun main() {
     val shuffledData = dataset.values.shuffled()
     val learningDataSize = 6000
     val learningData = shuffledData.take(learningDataSize)
-    val testingData = shuffledData.takeLast(10000 - learningDataSize).normalized()
+    val testingData = shuffledData.takeLast(shuffledData.size - learningDataSize).normalized()
 
     val normalizedHoursStudied = learningData.extractFloatHoursStudied().normalized()
     val normalizedPreviousScoresStat = learningData.extractFloatPreviousScores().normalized()
