@@ -5,6 +5,7 @@ import io.github.zerumi.model.*
 import io.github.zerumi.stat.ListStat
 import io.github.zerumi.stat.normalized
 import io.github.zerumi.util.head
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 fun main() {
@@ -32,8 +33,9 @@ fun main() {
     println("----------------------------")
 
     val shuffledData = dataset.values.shuffled()
-    val learningData = shuffledData.take(8000)
-    val testingData = shuffledData.takeLast(2000).normalized()
+    val learningDataSize = 6000
+    val learningData = shuffledData.take(learningDataSize)
+    val testingData = shuffledData.takeLast(10000 - learningDataSize).normalized()
 
     val normalizedHoursStudied = learningData.extractFloatHoursStudied().normalized()
     val normalizedPreviousScoresStat = learningData.extractFloatPreviousScores().normalized()
@@ -50,22 +52,22 @@ fun main() {
 
     println("----------------------------")
 
-    val x = Matrix(
-        listOf(
-            normalizedHoursStudied,
-            normalizedPreviousScoresStat,
-            normalizedExtracurricularActivitiesStat,
-            normalizedSleepHoursStat,
-            normalizedSampleQuestionPapersPracticedStat
-        )
-    ) // 5 x 10000
+    val x = Matrix(listOf(normalizedHoursStudied,
+        normalizedPreviousScoresStat,
+        normalizedExtracurricularActivitiesStat,
+        normalizedSleepHoursStat,
+        normalizedSampleQuestionPapersPracticedStat,
+        List(learningDataSize) { 1.0f })) // 6 x 10000
 
     val y = Matrix(
-        listOf(dataset.values.extractFloatPerformanceIndex())
+        listOf(
+            learningData.extractFloatPerformanceIndex()
+        )
     ) // 1 x 10000
 
-    val beta = ((x * x.transposed()).inverse() * x * (y.transposed())).matrix.flatten()
+    val beta = ((x * x.transpose()).inverse() * x * (y.transpose())).matrix.flatten()
     println("Optimal coefficients: $beta")
+    println("Check: ${beta.sum()}")
 
     println("----------------------------")
 
@@ -74,7 +76,8 @@ fun main() {
         previousScoresCoefficient = beta[1],
         extracurricularActivitiesCoefficient = beta[2],
         sleepHoursCoefficient = beta[3],
-        sampleQuestionPapersPracticedCoefficient = beta[4]
+        sampleQuestionPapersPracticedCoefficient = beta[4],
+        freeCoefficient = beta[5],
     )
 
     println("Calculate on test data:")
@@ -83,6 +86,17 @@ fun main() {
     val performanceResult = testResult.extractPerformanceIndex()
     val testRealPerformance = testingData.extractPerformanceIndex()
 
-    println("Function result: ${performanceResult.take(10).map { it.roundToInt().toFloat() }}")
-    println("Real test data : ${testRealPerformance.take(10)}")
+    println("Function result: ${performanceResult.take(15).map { it.roundToInt().toFloat() }}")
+    println("Real test data : ${testRealPerformance.take(15)}")
+
+    println("Average function result : ${performanceResult.average().roundToInt()}")
+    println("Average test data result: ${testRealPerformance.average().roundToInt()}")
+
+    val correlation = 1.0f - ((testRealPerformance.foldIndexed(0.0f) { index, acc, fl ->
+        acc + (fl - performanceResult[index]).pow(2)
+    }) / (testRealPerformance.fold(0.0f) { acc, fl ->
+        acc + (fl - testRealPerformance.average().toFloat()).pow(2)
+    }))
+
+    println("Determination: $correlation")
 }

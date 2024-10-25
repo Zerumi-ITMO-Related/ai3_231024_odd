@@ -3,7 +3,7 @@ package io.github.zerumi.model
 data class Matrix(
     val matrix: List<List<Float>>
 ) {
-    fun transposed(): Matrix {
+    fun transpose(): Matrix {
         val rows = matrix.size
         val columns = matrix[0].size
         val transposedMatrix = MutableList(columns) { MutableList(rows) { 0.0f } }
@@ -69,7 +69,7 @@ data class Matrix(
         require(det != 0.0f) { "Matrix is not invertible" }
 
         val cofactorMatrix = cofactorMatrix()
-        val adjugateMatrix = cofactorMatrix.transposed()
+        val adjugateMatrix = cofactorMatrix.transpose()
 
         val inverseMatrix = adjugateMatrix.matrix.map { row ->
             row.map { element -> element / det }

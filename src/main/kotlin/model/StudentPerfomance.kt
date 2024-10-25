@@ -26,9 +26,11 @@ data class StudentPerformanceFunction(
     val extracurricularActivitiesCoefficient: Float,
     val sleepHoursCoefficient: Float,
     val sampleQuestionPapersPracticedCoefficient: Float,
+    val freeCoefficient: Float,
 ) {
     fun calculate(testStudentPerformance: FloatStudentPerformance) = testStudentPerformance.copy(
-        performanceIndex = hoursStudiedCoefficient * testStudentPerformance.hoursStudied +
+        performanceIndex = freeCoefficient +
+                hoursStudiedCoefficient * testStudentPerformance.hoursStudied +
                 previousScoresCoefficient * testStudentPerformance.previousScores +
                 extracurricularActivitiesCoefficient * testStudentPerformance.extracurricularActivities +
                 sleepHoursCoefficient * testStudentPerformance.sleepHours +
